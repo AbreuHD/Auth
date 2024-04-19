@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Auth.Core.Application\Auth.Core.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
