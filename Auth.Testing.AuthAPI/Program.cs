@@ -1,8 +1,9 @@
-using Auth.Core.Application;
+using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
 using Microsoft.AspNetCore.Identity;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(); //Add this line
-builder.Services.AddAuthServiceLayer(builder.Configuration); //Add this line
 builder.Services.AddIdentityInfrastructure(builder.Configuration); //Add this line
 
 var app = builder.Build();

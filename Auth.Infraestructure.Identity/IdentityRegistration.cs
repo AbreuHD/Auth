@@ -1,10 +1,7 @@
-﻿using Auth.Core.Application.Interfaces.Services;
-using Auth.Core.Application.Services;
+﻿using Auth.Core.Application.DTOs.Account;
 using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Services;
-using Auth.Core.Application.DTOs.Account;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using System.Configuration;
+using System.Reflection;
 using System.Text;
 
 namespace Auth.Infraestructure.Identity
@@ -40,7 +39,7 @@ namespace Auth.Infraestructure.Identity
                 option.LoginPath = "/Account";
                 option.AccessDeniedPath = "/User/AccessDenied";
             });
-            services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
+            //services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
 
             services.AddAuthentication(options =>
             {
@@ -98,10 +97,11 @@ namespace Auth.Infraestructure.Identity
 
                 };
             });
+            //services.AddSingleton<JWTSettings>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
-
-            services.AddTransient<IAccountService, AccountService>();
-            services.AddTransient<IUserService, UserService>();
+            //services.AddTransient<IAccountService, AccountService>();
+            //services.AddTransient<IUserService, UserService>();
         }
     }
 }

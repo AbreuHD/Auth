@@ -16,6 +16,7 @@ namespace Auth.Infraestructure.Identity.Context
             modelBuilder.Entity<ApplicationUser>(entity => entity.ToTable("Users"));
             modelBuilder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
             modelBuilder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
+
         }
 
     }

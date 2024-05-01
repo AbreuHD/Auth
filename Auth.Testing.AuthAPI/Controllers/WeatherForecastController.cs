@@ -1,4 +1,8 @@
+using Auth.Core.Application.Features.Login.Queries.AuthLogin;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
@@ -6,28 +10,25 @@ namespace Auth.Testing.AuthAPI.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+        public IMediator Mediator { get; }
+        private readonly ILogger<WeatherForecastController> _logger;
+
+        public WeatherForecastController(IMediator mediator, ILogger<WeatherForecastController> logger)
+        {
+            Mediator = mediator;
+            _logger = logger;
+        }
+
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        [HttpPost("login")]
+        public async Task<IActionResult> AuthLogin([FromBody] AuthLoginQuery request)
         {
-            _logger = logger;
-        }
-
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var data = await Mediator.Send(request);
+            return Ok(data);
         }
     }
 }
