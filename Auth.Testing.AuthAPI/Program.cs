@@ -1,9 +1,7 @@
-using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
 using Microsoft.AspNetCore.Identity;
-using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,18 +21,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    try
-    {
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-
-        await DefaultRoles.Seed(userManager, roleManager);
-        await DefaultOwner.Seed(userManager, roleManager);
-        await DefaultUser.Seed(userManager, roleManager);
-    }
-    catch (Exception ex)
-    {
-    }
+    await services.AddIdentityRolesAsync();
 } // Add this block
 
 if (app.Environment.IsDevelopment())

@@ -1,8 +1,7 @@
 using Auth.Core.Application.Features.Login.Queries.AuthLogin;
+using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
@@ -26,6 +25,13 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> AuthLogin([FromBody] AuthLoginQuery request)
+        {
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateAccountCommand request)
         {
             var data = await Mediator.Send(request);
             return Ok(data);

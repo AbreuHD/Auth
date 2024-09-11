@@ -2,14 +2,14 @@
 using Auth.Core.Application.DTOs.Generic;
 using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Auth.Infraestructure.Identity.Extra;
-using Microsoft.Extensions.Configuration;
 
 namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
 {

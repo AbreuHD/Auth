@@ -2,16 +2,17 @@
 using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using System.Configuration;
 using System.Reflection;
 using System.Text;
 
@@ -21,8 +22,6 @@ namespace Auth.Infraestructure.Identity
     {
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-
-
             services.AddDbContext<IdentityContext>(options =>
             {
                 options.EnableSensitiveDataLogging();
@@ -40,8 +39,9 @@ namespace Auth.Infraestructure.Identity
                 option.AccessDeniedPath = "/User/AccessDenied";
             });
             //services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
+            services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
 
-            services.AddAuthentication(options =>
+            _ = services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -99,9 +99,27 @@ namespace Auth.Infraestructure.Identity
             });
             //services.AddSingleton<JWTSettings>();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
 
             //services.AddTransient<IAccountService, AccountService>();
             //services.AddTransient<IUserService, UserService>();
+        }
+
+        public static async Task AddIdentityRolesAsync(this IServiceProvider services)
+        {
+            try
+            {
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+                await DefaultRoles.Seed(userManager, roleManager);
+                await DefaultOwner.Seed(userManager, roleManager);
+                await DefaultUser.Seed(userManager, roleManager);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }
