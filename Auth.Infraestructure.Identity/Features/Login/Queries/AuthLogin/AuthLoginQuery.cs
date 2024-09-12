@@ -32,7 +32,14 @@ namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-        private readonly JWTSettings _jwtSettings = configuration.GetSection("JWTSettings").Get<JWTSettings>();
+        private readonly JWTSettings _jwtSettings 
+            = new JWTSettings() 
+            { 
+                Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"],
+                Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"],
+                Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"],
+                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"])
+            };
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {

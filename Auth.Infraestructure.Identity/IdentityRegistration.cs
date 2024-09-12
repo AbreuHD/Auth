@@ -25,7 +25,7 @@ namespace Auth.Infraestructure.Identity
             services.AddDbContext<IdentityContext>(options =>
             {
                 options.EnableSensitiveDataLogging();
-                options.UseMySql(configuration.GetConnectionString("IdentityConnection"), new MySqlServerVersion(new Version(10, 6, 16)),
+                options.UseMySql(Environment.GetEnvironmentVariable("IdentityConnection") ?? configuration.GetConnectionString("IdentityConnection"), new MySqlServerVersion(new Version(10, 6, 16)),
                     m => m.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName).SchemaBehavior(MySqlSchemaBehavior.Ignore));
             });
 
@@ -37,7 +37,21 @@ namespace Auth.Infraestructure.Identity
                 option.LoginPath = "/Account";
                 option.AccessDeniedPath = "/User/AccessDenied";
             });
-            services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+            if (Environment.GetEnvironmentVariable("SmtpPassword") != null)
+            {
+                _ = services.Configure<MailSettings>(x =>
+                {
+                    x.EmailFrom = Environment.GetEnvironmentVariable("EmailFrom");
+                    x.SmtpHost = Environment.GetEnvironmentVariable("SmtpHost");
+                    x.SmtpPort = int.Parse(Environment.GetEnvironmentVariable("SmtpPort"));
+                    x.DisplayName = Environment.GetEnvironmentVariable("DisplayName");
+                    x.SmtpUser = Environment.GetEnvironmentVariable("SmtpUser");
+                    x.SmtpPassword = Environment.GetEnvironmentVariable("SmtpPassword");
+                });
+            }
+            else {
+                services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+            }
 
             _ = services.AddAuthentication(options =>
             {
