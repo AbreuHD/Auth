@@ -4,12 +4,13 @@ using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Text;
+using Auth.Infraestructure.Identity.Extra;
 
 namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class CreateAccountCommand : IRequest<GenericApiResponse<string>>
     {
         public required string Name { get; set; }
@@ -34,7 +35,6 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
             _signInManager = signInManager;
             Mediator = mediator;
         }
-
 
         public async Task<GenericApiResponse<string>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
@@ -83,7 +83,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
             response.Payload = regiteredUser.Id;
             await _userManager.AddToRoleAsync(user, Roles.User.ToString());
 
-            var verificationUrl = await SendVerificationEMailUrl(user, request.ORIGIN);
+            var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.ORIGIN, _userManager);
 
             await Mediator.Send(new SendEmailCommand 
             {
@@ -93,18 +93,6 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
             }, cancellationToken);
 
             return response;
-        }
-
-        private async Task<string> SendVerificationEMailUrl(ApplicationUser user, string origin)
-        {
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var route = "Account/EmailConfirm";
-            var url = new Uri(string.Concat($"{origin}/", route));
-            var verificationUrl = QueryHelpers.AddQueryString(url.ToString(), "userId", user.Id);
-            verificationUrl = QueryHelpers.AddQueryString(verificationUrl, "token", code);
-
-            return verificationUrl;
         }
     }
 }

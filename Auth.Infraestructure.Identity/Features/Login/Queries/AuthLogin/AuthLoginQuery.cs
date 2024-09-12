@@ -13,24 +13,26 @@ using System.Text;
 
 namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
 {
+    /// <summary>
+    /// AuthLoginQuery Class, this class is used to login the user and generate a JWT Token for the user.
+    /// </summary>
+    /// <param UserName="UserName">
+    /// <param Password="Password">
+    /// <returns>
+    /// <see cref="GenericApiResponse<AuthenticationResponse>"/>
+    /// </returns>
     public class AuthLoginQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        public required string UserName { get; set; }
+        public required string Password { get; set; }
     }
 
-    public class AuthLoginQueryHandler : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
+    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
+        : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly JWTSettings _jwtSettings;
-
-        public AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _jwtSettings = configuration.GetSection("JWTSettings").Get<JWTSettings>();
-        }
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly JWTSettings _jwtSettings = configuration.GetSection("JWTSettings").Get<JWTSettings>();
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {

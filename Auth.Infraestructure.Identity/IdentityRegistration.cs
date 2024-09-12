@@ -29,7 +29,6 @@ namespace Auth.Infraestructure.Identity
                     m => m.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName).SchemaBehavior(MySqlSchemaBehavior.Ignore));
             });
 
-
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
 
@@ -38,7 +37,6 @@ namespace Auth.Infraestructure.Identity
                 option.LoginPath = "/Account";
                 option.AccessDeniedPath = "/User/AccessDenied";
             });
-            //services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
             services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
 
             _ = services.AddAuthentication(options =>
@@ -97,12 +95,8 @@ namespace Auth.Infraestructure.Identity
 
                 };
             });
-            //services.AddSingleton<JWTSettings>();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
-
-            //services.AddTransient<IAccountService, AccountService>();
-            //services.AddTransient<IUserService, UserService>();
         }
 
         public static async Task AddIdentityRolesAsync(this IServiceProvider services)
