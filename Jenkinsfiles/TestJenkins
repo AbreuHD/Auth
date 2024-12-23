@@ -1,0 +1,51 @@
+pipeline {
+    agent { label 'Africa' }
+    environment {
+        NUGET_API_KEY = credentials('private_nuget_api_key')
+        NUGET_SERVER_URL = credentials('private_nuget_uri')
+    }
+
+    stages {
+        stage('Restore dependencies') {
+            steps {
+                echo 'Restoring project dependencies...'
+                sh 'dotnet restore Auth.sln'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQ-DotNET8'
+                    withSonarQubeEnv('SonarQ') {
+                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:\"Auth\""
+                        sh "dotnet build"
+                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll end"
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                sh 'dotnet build --configuration Release'
+            }
+        }
+        stage('Create NuGet package') {
+            steps {
+                echo 'Packing the project...'
+                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release --output ./nupkgs'
+            }
+        }
+
+        stage('Publish NuGet package') {
+            steps {
+                echo 'Uploading NuGet package to the repository...'
+                sh '''
+                dotnet nuget push ./nupkgs/*.nupkg \
+                    --source $NUGET_SERVER_URL \
+                    --api-key $NUGET_API_KEY
+                '''
+            }
+        }
+    }
+}
